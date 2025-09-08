@@ -4,36 +4,48 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "transactions")
 public class Transaction {
 
     @Id
-    private String id; // or other PK type; match your DB
+    @Column(name = "id")   // explicit PK column
+    private String id;
 
+    // link to PayrollEntry (uses its PK = id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payroll_entry_id")   // FK column in transactions
+    private PayrollEntry payrollEntry;
+
+    @Column(name = "amount")
     private BigDecimal amount;
+
+    @Column(name = "type")
     private String type;      // "DEBIT" or "CREDIT"
+
+    @Column(name = "status")
     private String status;    // e.g. "Approved"
+
+    @Column(name = "counterparty")
     private String counterparty;
+
+    @Column(name = "date_time")
     private LocalDateTime dateTime;
 
-    // link to Batch (no change to Batch entity required)
+    // link to Batch (uses its PK = id)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "batch_id", referencedColumnName = "id", insertable = true, updatable = false)
+    @JoinColumn(name = "batch_id")           // FK column in transactions
     private Batch batch;
 
-    // link to Account
+    // link to Account (uses its PK = account_number)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_number", referencedColumnName = "accountNumber", insertable = true, updatable = true)
+    @JoinColumn(name = "account_number")     // FK column in transactions
     private Account account;
 
     public Transaction() {}
 
-    public Transaction(String id, BigDecimal amount, String type, String status, String counterparty, LocalDateTime dateTime) {
+    public Transaction(String id, BigDecimal amount, String type, String status,
+                       String counterparty, LocalDateTime dateTime) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -60,6 +72,9 @@ public class Transaction {
 
     public LocalDateTime getDateTime() { return dateTime; }
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public PayrollEntry getPayrollEntry() { return payrollEntry; }
+    public void setPayrollEntry(PayrollEntry payrollEntry) { this.payrollEntry = payrollEntry; }
 
     public Batch getBatch() { return batch; }
     public void setBatch(Batch batch) { this.batch = batch; }
